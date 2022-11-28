@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 import pandas as pd
 from django.shortcuts import redirect
-from .bills_validator import validator
+from .bills_validator import bills_validator, clients_validator
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -29,19 +29,33 @@ class BillsUploadAPIView(generics.CreateAPIView):
         file = serializer.validated_data['file']
         new_tabl = pd.read_csv(file)
 
-        for _, row in new_tabl.iterrows():
-            if validator(row) == False:
+        # Add Clients
+        clients_set = set(new_tabl['client_name'])
+        for client in clients_set:
+            if clients_validator(client) == False:
                 continue
-            new_file = Bills(
-                       client_name = row['client_name'],
-                       client_org= row["client_org"],
-                       number= row['№'],
-                       date= row["date"],
-                       service= row["service"],
-                       bills_sum = float(row['sum'].replace(',', '.'))
-                       )
+            new_row = Clients(client_name = client)
             try:            
-                new_file.save()
+                new_row.save()
+            except Exception as ex:
+                if ex == 'This client_name already exists':
+                    continue
+
+        # Add Bills
+        for _, row in new_tabl.iterrows():
+            if bills_validator(row) == False:
+                continue
+            client_object = Clients.objects.get(client_name=row["client_name"])
+            new_row = Bills(
+                    client = client_object,
+                    client_org = row["client_org"],
+                    number = row['№'],
+                    date = row["date"],
+                    service = row["service"],
+                    bills_sum = float(row['sum'].replace(',', '.'))
+                    )
+            try:            
+                new_row.save()
             except Exception as ex:
                 if ex == 'This client-number pair already exists':
                     continue

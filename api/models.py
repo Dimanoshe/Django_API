@@ -8,9 +8,25 @@ class BillsUpload(models.Model):
     def __str__(self):
         return self.file
 
+class Clients(models.Model):
+    client_name = models.CharField(max_length=255)
+
+    def save(self, *args, **kwargs):
+        duplicates = Clients.objects.filter(
+            client_name=self.client_name,
+        )
+        if duplicates.exists() > 0:
+            raise ValueError('This client_name already exists')
+        else:
+            super(Clients, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Client'
+        verbose_name_plural = 'Clients'
+
 
 class Bills(models.Model):
-    client_name = models.CharField(max_length=255)
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE)
     client_org = models.CharField(max_length=255)
     number = models.IntegerField()
     date = models.CharField(max_length=255)
@@ -18,11 +34,11 @@ class Bills(models.Model):
     bills_sum = models.DecimalField(max_digits=9, decimal_places=2)
 
     def save(self, *args, **kwargs):
-        q = Bills.objects.filter(
+        duplicates = Bills.objects.filter(
             client_org=self.client_org,
             number=self.number,
         )
-        if q.exists() > 0:
+        if duplicates.exists() > 0:
             raise ValueError('This client_org-number pair already exists')
         else:
             super(Bills, self).save(*args, **kwargs)
