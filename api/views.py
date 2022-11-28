@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 import pandas as pd
 from django.shortcuts import redirect
+from .bills_validator import validator
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -29,6 +30,8 @@ class BillsUploadAPIView(generics.CreateAPIView):
         new_tabl = pd.read_csv(file)
 
         for _, row in new_tabl.iterrows():
+            if validator(row) == False:
+                continue
             new_file = Bills(
                        client_name = row['client_name'],
                        client_org= row["client_org"],
