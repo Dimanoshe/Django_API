@@ -9,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    # Not available to unauthorized users
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -26,6 +27,10 @@ class ClientsViewSet(viewsets.ModelViewSet):
 
 
 class BillsUploadAPIView(generics.CreateAPIView):
+    '''
+        This class for upload csv tables.
+        It fills in the models line by line, which is definitely not very good.
+    '''
     queryset = Bills.objects.all()
     serializer_class = BillsUploadSerializer
 
@@ -35,7 +40,7 @@ class BillsUploadAPIView(generics.CreateAPIView):
         file = serializer.validated_data['file']
         new_tabl = pd.read_csv(file)
 
-        # Add Clients
+        # Adds only unique сlients
         clients_set = set(new_tabl['client_name'])
         for client in clients_set:
             if clients_validator(client) == False:

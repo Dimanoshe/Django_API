@@ -12,6 +12,7 @@ class Clients(models.Model):
     client_name = models.CharField(max_length=255, unique=True)
 
     def save(self, *args, **kwargs):
+        # Before saving, a simple check for duplicates takes place.
         duplicates = Clients.objects.filter(
             client_name=self.client_name,
         )
@@ -26,6 +27,7 @@ class Clients(models.Model):
 
 
 class Bills(models.Model):
+    # TODO: Set date to correct formatd
     client = models.ForeignKey(Clients, on_delete=models.CASCADE)
     client_org = models.CharField(max_length=255)
     number = models.IntegerField()
@@ -34,6 +36,7 @@ class Bills(models.Model):
     bills_sum = models.DecimalField(max_digits=9, decimal_places=2)
 
     def save(self, *args, **kwargs):
+        # Before saving, a simple check for duplicates takes place.
         duplicates = Bills.objects.filter(
             client_org=self.client_org,
             number=self.number,
