@@ -9,7 +9,7 @@ class BillsUpload(models.Model):
         return self.file
 
 class Clients(models.Model):
-    client_name = models.CharField(max_length=255)
+    client_name = models.CharField(max_length=255, unique=True)
 
     def save(self, *args, **kwargs):
         duplicates = Clients.objects.filter(
@@ -44,7 +44,7 @@ class Bills(models.Model):
             super(Bills, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f'{self.client_name} - {self.number}'
+        return f'{self.client} - {self.number}'
 
     class Meta:
         verbose_name = 'Bill'

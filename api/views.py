@@ -5,6 +5,7 @@ from rest_framework import generics
 import pandas as pd
 from django.shortcuts import redirect
 from .bills_validator import bills_validator, clients_validator
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -16,13 +17,18 @@ class UserViewSet(viewsets.ModelViewSet):
 class BillsViewSet(viewsets.ModelViewSet):
     queryset = Bills.objects.all()
     serializer_class = BillsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['client', 'client_org']
+
+class ClientsViewSet(viewsets.ModelViewSet):
+    queryset = Clients.objects.all()
+    serializer_class = ClientsSerializer
 
 
 class BillsUploadAPIView(generics.CreateAPIView):
     queryset = Bills.objects.all()
     serializer_class = BillsUploadSerializer
-    
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

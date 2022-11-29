@@ -8,12 +8,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ['url', 'username', 'email', 'is_staff']
 
-class BillsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bills
-        fields = '__all__'
-
 class BillsUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = BillsUpload
+        fields = '__all__'
+
+class ClientsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Clients
+        fields = '__all__'
+
+class BillsSerializer(serializers.ModelSerializer):
+    client = ClientsSerializer()
+    class Meta:
+        model = Bills
         fields = '__all__'
